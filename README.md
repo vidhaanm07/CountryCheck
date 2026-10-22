@@ -29,16 +29,6 @@ python -m http.server 8000
 
 Then visit <http://localhost:8000>.
 
-## Deploy with GitHub Pages
-
-1. Push these files to a GitHub repository.
-2. Open **Settings → Pages**.
-3. Under **Build and deployment**, choose **Deploy from a branch**.
-4. Select the `main` branch and `/ (root)` folder, then save.
-5. Wait for GitHub Pages to publish the site. The URL will appear in the Pages settings.
-
-The included workflow at `.github/workflows/pages.yml` can alternatively deploy the site with GitHub Actions. If using the workflow, open **Settings → Pages** and set the source to **GitHub Actions**.
-
 ## Tech stack
 
 - HTML5 and CSS3
@@ -70,7 +60,7 @@ guess-the-country/
 
 ## License
 
-Released under the MIT License. See [`LICENSE`](LICENSE).
+Released by Vidhaan Mathur. See [`LICENSE`](LICENSE).
 
 ---
 
