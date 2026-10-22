@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Guess the Country — World Map Challenge</title>
+<style>
+:root{--bg:#07111f;--panel:#0d1b2c;--panel2:#10243a;--line:#203a53;--text:#eef7ff;--muted:#91a9bf;--cyan:#52e5df;--blue:#4d8dff;--green:#4de0a3;--red:#ff6e7a;--gold:#ffd166}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -15%,#163b59 0%,var(--bg) 52%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;min-height:100vh}
+button{font:inherit;cursor:pointer;border:0}button:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
+.app{max-width:1440px;margin:auto;padding:26px clamp(14px,3vw,38px) 30px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:25px}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(145deg,var(--cyan),#4c92ff);display:grid;place-items:center;color:#061524;font-size:24px;font-weight:900;box-shadow:0 0 28px #52e5df30}.brand h1{font-size:19px;margin:0;letter-spacing:-.4px}.brand p{margin:3px 0 0;font-size:12px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase}
+.pill{border:1px solid var(--line);border-radius:999px;padding:9px 13px;color:var(--muted);font-size:12px;white-space:nowrap}.pill span{color:var(--cyan);font-weight:700}
+.hero{text-align:center;margin:18px 0 23px}.eyebrow{color:var(--cyan);font-size:11px;letter-spacing:2.4px;text-transform:uppercase;font-weight:800}.hero h2{font-size:clamp(28px,4vw,46px);letter-spacing:-1.8px;margin:10px 0 8px;line-height:1.1}.hero h2 em{font-style:normal;color:var(--cyan)}.hero p{margin:0;color:var(--muted);font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:15px}.stat{background:#0d1b2ccc;border:1px solid var(--line);border-radius:15px;padding:14px 17px;min-width:0}.stat .label{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted)}.stat .value{font-size:25px;font-weight:800;letter-spacing:-.5px;margin-top:5px}.stat .value small{font-size:13px;color:var(--muted);font-weight:500}
+.game-layout{display:grid;grid-template-columns:minmax(0,1fr) 285px;gap:15px;align-items:stretch}.map-panel,.side-panel{background:linear-gradient(160deg,#0e2033f5,#091725f5);border:1px solid var(--line);border-radius:20px;overflow:hidden}.map-head{padding:17px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}.target-label{font-size:11px;text-transform:uppercase;letter-spacing:1.7px;color:var(--muted)}.target{font-size:clamp(22px,3vw,32px);font-weight:850;letter-spacing:-.8px;margin-top:4px}.target .country{color:var(--cyan)}.timer-wrap{display:flex;align-items:center;gap:11px}.timer{font-size:30px;font-weight:850;font-variant-numeric:tabular-nums;min-width:47px;text-align:right}.timer.urgent{color:var(--red)}.timer-ring{width:44px;height:44px;position:relative}.timer-ring svg{transform:rotate(-90deg)}.ring-bg{stroke:#263c50;fill:none;stroke-width:4}.ring-progress{stroke:var(--cyan);fill:none;stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset .1s linear}.timer-ring.urgent .ring-progress{stroke:var(--red)}
+.map-stage{position:relative;min-height:390px;background:radial-gradient(ellipse at center,#0e2a40 0%,#081724 68%);overflow:hidden}.map-stage:before{content:"";position:absolute;inset:0;background-image:linear-gradient(#284a611e 1px,transparent 1px),linear-gradient(90deg,#284a611e 1px,transparent 1px);background-size:36px 36px;pointer-events:none}.map-stage svg{width:100%;height:auto;min-height:390px;display:block;position:relative;z-index:1;touch-action:none}.map-tools{position:absolute;z-index:4;right:12px;top:12px;display:flex;gap:6px}.map-tools button{width:36px;height:36px;border-radius:10px;background:#102a40ef;border:1px solid #31536b;color:#eaf8ff;font-size:20px;font-weight:700}.country-shape{fill:#23445c;stroke:#0b1825;stroke-width:.55;cursor:pointer;transition:fill .12s,filter .12s}.country-shape:hover{fill:#3c7990;filter:drop-shadow(0 0 3px #52e5df66)}.country-shape.correct{fill:var(--green)!important;filter:drop-shadow(0 0 6px #4de0a399)}.country-shape.wrong{fill:var(--red)!important}.country-shape.reveal{fill:var(--gold)!important;filter:drop-shadow(0 0 6px #ffd16688)}.map-loading{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);z-index:2;font-size:14px}.map-loading.hidden{display:none}
+.map-footer{padding:12px 18px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--muted);font-size:12px}.map-footer .dot{display:inline-block;width:7px;height:7px;background:var(--green);border-radius:50%;margin-right:7px;box-shadow:0 0 9px #4de0a3}
+.side-panel{padding:19px;display:flex;flex-direction:column;gap:18px}.section-title{font-size:11px;text-transform:uppercase;letter-spacing:1.7px;color:var(--muted);font-weight:800}.progress-top{display:flex;justify-content:space-between;align-items:center;font-size:13px;margin:9px 0}.progress-top strong{color:var(--cyan)}.progress-track{height:5px;background:#1e3448;border-radius:99px;overflow:hidden}.progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--cyan));transition:width .3s}.message{border:1px solid var(--line);background:#10243a99;border-radius:14px;padding:14px;min-height:91px}.message strong{display:block;font-size:14px;margin-bottom:6px}.message p{font-size:12px;line-height:1.5;color:var(--muted);margin:0}.message.good{border-color:#4de0a355}.message.good strong{color:var(--green)}.message.bad{border-color:#ff6e7a55}.message.bad strong{color:var(--red)}.message.neutral strong{color:var(--gold)}
+.controls{display:grid;gap:9px;margin-top:auto}.btn-primary,.btn-secondary{padding:12px 14px;border-radius:11px;font-weight:750;font-size:13px;transition:transform .15s,filter .15s}.btn-primary{background:linear-gradient(100deg,var(--cyan),#70b9ff);color:#061524;box-shadow:0 5px 20px #52e5df1c}.btn-secondary{background:#12283c;border:1px solid #29445b;color:var(--text)}.btn-primary:hover,.btn-secondary:hover{filter:brightness(1.08);transform:translateY(-1px)}button:disabled{opacity:.45;cursor:not-allowed;transform:none!important}
+.hint{font-size:11px;line-height:1.55;color:var(--muted)}.bottomline{display:flex;justify-content:space-between;gap:14px;align-items:center;margin-top:15px;color:#6f8ba5;font-size:11px}.bottomline strong{color:#a9c4da;font-weight:600}
+.overlay{position:fixed;inset:0;background:#030a12d9;backdrop-filter:blur(10px);z-index:10;display:grid;place-items:center;padding:20px}.modal{width:min(480px,100%);background:linear-gradient(150deg,#112b42,#0a1725);border:1px solid #2b4b63;border-radius:24px;padding:30px;text-align:center;box-shadow:0 30px 100px #0008}.modal-icon{font-size:42px;margin-bottom:12px}.modal h2{font-size:31px;letter-spacing:-1px;margin:0 0 10px}.modal p{color:var(--muted);line-height:1.6;font-size:14px;margin:0 0 21px}.mode-row{display:flex;gap:7px;margin:20px 0}.mode{min-width:0;padding:12px 5px}.mode strong{font-size:11px}.mode small{font-size:10px}.mode{flex:1;background:#0a1928;border:1px solid #2a455c;color:var(--text);border-radius:12px;padding:13px 8px}.mode.selected{border-color:var(--cyan);background:#123143}.mode strong{display:block;font-size:13px}.mode small{display:block;font-size:11px;color:var(--muted);margin-top:5px}.modal .btn-primary{width:100%;padding:14px}.hidden-overlay{display:none}.result-score{font-size:50px;font-weight:900;color:var(--cyan);letter-spacing:-2px;margin:8px 0}.result-meta{display:flex;justify-content:center;gap:23px;margin:18px 0 24px}.result-meta span{font-size:12px;color:var(--muted)}.result-meta b{display:block;color:var(--text);font-size:20px;margin-bottom:3px}
+@media(max-width:900px){.game-layout{grid-template-columns:1fr}.side-panel{display:grid;grid-template-columns:1fr 1fr;gap:15px}.side-panel .controls{grid-column:1/-1;grid-template-columns:1fr 1fr}.side-panel .hint{grid-column:1/-1}.map-stage,.map-stage svg{min-height:300px}}
+@media(max-width:560px){.app{padding:16px 11px 24px}.topbar{margin-bottom:18px}.pill{display:none}.hero{margin:13px 0 18px}.stats{gap:7px}.stat{padding:11px 10px;border-radius:12px}.stat .label{font-size:9px;letter-spacing:.7px}.stat .value{font-size:20px}.game-layout{gap:10px}.map-head{padding:14px}.map-stage,.map-stage svg{min-height:235px}.timer{font-size:24px}.timer-ring{width:36px;height:36px}.timer-ring svg{width:36px;height:36px}.side-panel{padding:14px;grid-template-columns:1fr 1fr}.map-footer{font-size:10px}.bottomline{flex-direction:column;align-items:flex-start;gap:5px}.target{font-size:23px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand"><div class="logo">◎</div><div><h1>ATLAS / ARCADE</h1><p>Geography under pressure</p></div></div>
+    <div class="pill">WORLD CHALLENGE <span>· 10 SECONDS</span></div>
+  </header>
+  <section class="hero"><div class="eyebrow">How well do you know our planet?</div><h2>Guess the <em>Country.</em></h2><p>Find it on the map before the clock runs out. Trust your instincts.</p></section>
+  <section class="stats">
+    <div class="stat"><div class="label">Total score</div><div class="value" id="score">0 <small>pts</small></div></div>
+    <div class="stat"><div class="label">Current streak</div><div class="value" id="streak">0 <small>×</small></div></div>
+    <div class="stat"><div class="label">Round</div><div class="value" id="round">0 <small>/ 10</small></div></div>
+    <div class="stat"><div class="label">Best streak</div><div class="value" id="best">0 <small>×</small></div></div>
+  </section>
+  <main class="game-layout">
+    <section class="map-panel">
+      <div class="map-head"><div><div class="target-label">Find this country</div><div class="target" id="target">Ready to explore?</div></div>
+        <div class="timer-wrap"><div class="timer" id="timer">10.0</div><div class="timer-ring" id="timerRing"><svg width="44" height="44" viewBox="0 0 44 44"><circle class="ring-bg" cx="22" cy="22" r="18"/><circle class="ring-progress" id="ring" cx="22" cy="22" r="18" stroke-dasharray="113.1" stroke-dashoffset="0"/></svg></div></div>
+      </div>
+      <div class="map-stage"><div class="map-tools"><button id="zoomIn" title="Zoom in">+</button><button id="zoomOut" title="Zoom out">−</button><button id="zoomReset" title="Reset map">⤢</button></div><div class="map-loading" id="mapLoading">Loading the world map…</div><svg id="worldMap" viewBox="0 0 960 500" role="img" aria-label="Interactive world map. Click the country named above."></svg></div>
+      <div class="map-footer"><span><i class="dot"></i><span id="mapStatus">Map initializing</span></span><span>Click or tap a country to answer</span></div>
+    </section>
+    <aside class="side-panel">
+      <div><div class="section-title">Your run</div><div class="progress-top"><span>Round progress</span><strong id="progressText">0%</strong></div><div class="progress-track"><div class="progress-fill" id="progressFill"></div></div></div>
+      <div><div class="section-title">Round feedback</div><div class="message" id="message" style="margin-top:10px"><strong id="messageTitle">Ready when you are</strong><p id="messageBody">Your target country will appear here. You have 10 seconds to find it.</p></div></div>
+      <div><div class="section-title">Scoring</div><div class="hint" style="margin-top:10px">Correct answer: <strong style="color:var(--green)">+100 points</strong><br>Quick answer bonus: <strong style="color:var(--cyan)">up to +50</strong><br>Wrong answer or timeout: <strong style="color:var(--red)">0 points</strong><br>Build a streak to keep your focus sharp.</div></div>
+      <div class="controls"><button class="btn-primary" id="startBtn">Start challenge →</button><button class="btn-secondary" id="pauseBtn" disabled>Ⅱ Pause game</button><button class="btn-secondary" id="restartBtn">↻ Restart</button></div>
+      <div class="hint">Tip: Look at the shape and its neighbours. Small countries can be tricky — zoom in with your browser if needed.</div>
+    </aside>
+  </main>
+  <footer class="bottomline"><span>BUILT FOR THE CURIOUS <strong>·</strong> ONE PLANET, MANY COUNTRIES</span><span>World boundaries via Natural Earth · Map data loaded from public datasets</span></footer>
+</div>
+<div class="overlay" id="startOverlay"><div class="modal"><div class="modal-icon">🌐</div><div class="eyebrow">Your mission starts here</div><h2>Ready, explorer?</h2><p>Ten seconds. One country. One world map. Pick the right country before time runs out and rack up points.</p><div class="mode-row"><button class="mode selected" data-mode="10"><strong>10-round sprint</strong><small>Quick challenge</small></button><button class="mode" data-mode="city"><strong>City mode</strong><small>Find cities</small></button><button class="mode" data-mode="endless"><strong>Endless mode</strong><small>Play for a streak</small></button></div><button class="btn-primary" id="playBtn">Let's play →</button></div></div>
+<div class="overlay hidden-overlay" id="resultOverlay"><div class="modal"><div class="modal-icon" id="resultIcon">🏆</div><div class="eyebrow">Challenge complete</div><h2 id="resultTitle">World explorer</h2><div class="result-score" id="finalScore">0</div><p id="resultText">Nice work.</p><div class="result-meta"><span><b id="finalCorrect">0/10</b>Correct</span><span><b id="finalBest">0×</b>Best streak</span><span><b id="finalAccuracy">0%</b>Accuracy</span></div><button class="btn-primary" id="againBtn">Play again →</button></div></div>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const svg = d3.select("#worldMap");
+const ringCirc = 2 * Math.PI * 18;
+let countries=[], countryPaths, projection, path, mapLayer, zoomBehavior, target=null, mode="10", round=0, score=0, streak=0, best=0, correct=0, answered=0, active=false, paused=false, feedbackLock=false, timerStart=0, remaining=10, raf=0, advanceTimeout=0;
+const nameFix = {"United States of America":"United States","Russian Federation":"Russia","Dem. Rep. Korea":"North Korea","Democratic People's Republic of Korea":"North Korea","Korea":"South Korea","Republic of Korea":"South Korea","Czechia":"Czech Republic","Côte d'Ivoire":"Ivory Coast","eSwatini":"Eswatini","Swaziland":"Eswatini","The Gambia":"Gambia","Lao PDR":"Laos","Syrian Arab Republic":"Syria","Iran (Islamic Republic of)":"Iran","Viet Nam":"Vietnam","Brunei Darussalam":"Brunei","United Republic of Tanzania":"Tanzania","Moldova":"Moldova","Bolivia (Plurinational State of)":"Bolivia","Venezuela (Bolivarian Republic of)":"Venezuela","Taiwan":"Taiwan","Congo":"Republic of the Congo","Republic of the Congo":"Republic of the Congo","Democratic Republic of the Congo":"Democratic Republic of the Congo","Ivory Coast":"Ivory Coast","Türkiye":"Turkey","Timor-Leste":"East Timor","North Macedonia":"North Macedonia"};
+const ignored = new Set(["Antarctica"]);
+const cities = [
+["New York City","United States",40.7128,-74.006],["Toronto","Canada",43.6532,-79.3832],["Mexico City","Mexico",19.4326,-99.1332],["Rio de Janeiro","Brazil",-22.9068,-43.1729],["Buenos Aires","Argentina",-34.6037,-58.3816],["London","United Kingdom",51.5072,-0.1276],["Paris","France",48.8566,2.3522],["Madrid","Spain",40.4168,-3.7038],["Rome","Italy",41.9028,12.4964],["Cairo","Egypt",30.0444,31.2357],["Lagos","Nigeria",6.5244,3.3792],["Nairobi","Kenya",-1.2921,36.8219],["Cape Town","South Africa",-33.9249,18.4241],["Istanbul","Turkey",41.0082,28.9784],["Moscow","Russia",55.7558,37.6173],["Dubai","United Arab Emirates",25.2048,55.2708],["Mumbai","India",19.076,72.8777],["New Delhi","India",28.6139,77.209],["Bangkok","Thailand",13.7563,100.5018],["Singapore","Singapore",1.3521,103.8198],["Beijing","China",39.9042,116.4074],["Tokyo","Japan",35.6762,139.6503],["Seoul","South Korea",37.5665,126.978],["Jakarta","Indonesia",-6.2088,106.8456],["Sydney","Australia",-33.8688,151.2093],["Auckland","New Zealand",-36.8509,174.7645],["Reykjavik","Iceland",64.1466,-21.9426],["Stockholm","Sweden",59.3293,18.0686],["Athens","Greece",37.9838,23.7275],["Lima","Peru",-12.0464,-77.0428],["San Francisco","United States",37.7749,-122.4194],["Honolulu","United States",21.3099,-157.8581],["Kathmandu","Nepal",27.7172,85.324],["Kuala Lumpur","Malaysia",3.139,101.6869],["Doha","Qatar",25.2854,51.531],["Casablanca","Morocco",33.5731,-7.5898],["Havana","Cuba",23.1136,-82.3666]
+].map(([name,country,lat,lon])=>({name,country,lat,lon,city:true}));
+const normalize = s => (nameFix[s] || s || "").toLowerCase().replace(/&/g,"and").replace(/[^a-z0-9]/g,"");
+function countryName(f){const p=f.properties||{}; return p.name || p.NAME || p.ADMIN || p.name_long || p.NAME_EN || "Unknown";}
+async function loadMap(){
+ try{
+  let geo;
+  try { const r=await fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"); if(!r.ok)throw Error("map"); const topo=await r.json(); geo=topojson.feature(topo,topo.objects.countries); 
+    // Country IDs in world-atlas map to names using the companion TSV.
+    const tr=await fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.tsv");
+    if(tr.ok){const txt=await tr.text();const rows=txt.trim().split(/\r?\n/).slice(1);const lookup={};rows.forEach(line=>{const cols=line.split("\t");lookup[cols[0]]=cols[1]});geo.features.forEach(f=>{f.properties={...(f.properties||{}),name:lookup[String(f.id)]||f.properties.name||""}})}
+  } catch(e) {
+    const r=await fetch("https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson");if(!r.ok)throw e;geo=await r.json();
+  }
+  countries=geo.features.filter(f=>!ignored.has(countryName(f)) && countryName(f)!=="Unknown");
+  drawMap(); $("mapLoading").classList.add("hidden");$("mapStatus").textContent="World map ready";$("startBtn").disabled=false;
+ }catch(e){$("mapLoading").textContent="Couldn't load the map. Check your internet connection and refresh."; $("mapStatus").textContent="Map failed to load";$("startBtn").disabled=true;}
+}
+function drawMap(){
+ const width=960,height=500;
+ projection=d3.geoNaturalEarth1().fitExtent([[12,12],[width-12,height-12]],{type:"FeatureCollection",features:countries});
+ path=d3.geoPath(projection);
+ svg.selectAll("*").remove();
+ mapLayer=svg.append("g").attr("class","map-layer");
+ zoomBehavior=d3.zoom().scaleExtent([1,10]).on("zoom",event=>mapLayer.attr("transform",event.transform));
+ svg.call(zoomBehavior).on("dblclick.zoom",null);
+ mapLayer.selectAll("path").data(countries).join("path").attr("class","country-shape").attr("d",path)
+  .attr("data-key",f=>normalize(countryName(f))).attr("tabindex",0).attr("role","button")
+  .attr("aria-label",f=>countryName(f))
+  .on("click",(event,f)=>{if(mode!=="city")choose(f)})
+  .on("keydown",(event,f)=>{if(mode!=="city"&&(event.key==="Enter"||event.key===" ")){event.preventDefault();choose(f)}});
+}
+function choose(f){
+ if(!active||paused||feedbackLock||!target)return;
+ const n=countryName(f), hit=normalize(n)===normalize(target.name);
+ answered++;
+ if(hit){correct++;const bonus=Math.max(0,Math.round(50*remaining/10));score+=100+bonus;streak++;best=Math.max(best,streak);f3(f,"correct");showMessage("good","Correct! +"+(100+bonus)+" points",n+" found with "+remaining.toFixed(1)+" seconds left. "+(bonus?"Quick-pick bonus: +"+bonus+".":"")); }
+ else{streak=0;f3(f,"wrong");const right=countries.find(c=>normalize(countryName(c))===normalize(target.name));if(right)f3(right,"reveal");showMessage("bad","Not quite!", "That was "+n+". The correct answer is "+target.name+". Keep going — next one is coming up.");}
+ updateStats(); feedbackLock=true; cancelAnimationFrame(raf); $("pauseBtn").disabled=true;
+ advanceTimeout=setTimeout(()=>{if(active&&!paused)nextRound()},1500);
+}
+function f3(f,cls){mapLayer.selectAll("path").filter(d=>d===f).classed(cls,true)}
+function revealCity(){if(target&&target.city){const pt=projection([target.lon,target.lat]);mapLayer.append("circle").attr("cx",pt[0]).attr("cy",pt[1]).attr("r",5).attr("fill","#ffd166").attr("stroke","#fff").attr("stroke-width",2).style("filter","drop-shadow(0 0 7px #ffd166aa)").style("pointer-events","none");}}
+svg.on("click.city",function(event){
+ if(mode!=="city"||!active||paused||feedbackLock||!target||!target.city)return;
+ const pt=d3.pointer(event,svg.node()), tr=d3.zoomTransform(svg.node()), dest=tr.apply(projection([target.lon,target.lat]));
+ if(Math.hypot(pt[0]-dest[0],pt[1]-dest[1])<=18){
+  answered++;correct++;const bonus=Math.max(0,Math.round(50*remaining/10));score+=100+bonus;streak++;best=Math.max(best,streak);feedbackLock=true;cancelAnimationFrame(raf);revealCity();showMessage("good","City found! +"+(100+bonus)+" points",target.name+" located. Speed bonus: +"+bonus+".");updateStats();$("pauseBtn").disabled=true;advanceTimeout=setTimeout(()=>{if(active&&!paused)nextRound()},1500);
+ } else {showMessage("neutral","Not quite there","Zoom in and try again — you have "+remaining.toFixed(1)+" seconds left.");}
+});
+function showMessage(cls,title,body){$("message").className="message "+cls;$("messageTitle").textContent=title;$("messageBody").textContent=body}
+function updateStats(){
+ $("score").innerHTML=score+' <small>pts</small>';$("streak").innerHTML=streak+' <small>×</small>';$("best").innerHTML=best+' <small>×</small>';
+ $("round").innerHTML=(mode==="endless"?round:Math.min(round,10))+' <small>/ '+(mode==="endless"?"∞":"10")+'</small>';
+ const pct=mode==="endless"?Math.min(100,round%10*10):(round/10*100);$("progressFill").style.width=pct+"%";$("progressText").textContent=Math.round(pct)+"%";
+}
+function pickTarget(){
+ if(mode==="city"){
+  let next=cities[Math.floor(Math.random()*cities.length)];
+  for(let i=0;i<8&&next.name===target?.name;i++)next=cities[Math.floor(Math.random()*cities.length)];
+  return {...next};
+ }
+ const pool=countries.filter(f=>!ignored.has(countryName(f)) && countryName(f)!=="Unknown");
+ if(!pool.length)return null;
+ let next=pool[Math.floor(Math.random()*pool.length)];
+ for(let i=0;i<8&&normalize(countryName(next))===normalize(target?.name);i++)next=pool[Math.floor(Math.random()*pool.length)];
+ return {name:countryName(next),feature:next};
+}
+function nextRound(){
+ if(!active)return;
+ if(mode!=="endless"&&round>=(mode==="city"?10:Number(mode))){finish();return}
+ round++;target=pickTarget();feedbackLock=false;
+ mapLayer.selectAll("circle").remove();
+ svg.selectAll("path").classed("correct",false).classed("wrong",false).classed("reveal",false);
+ $("target").innerHTML='<span class="country">'+target.name+'</span>';
+ showMessage("neutral",mode==="city"?"Locate this city":"Find the country",mode==="city"?"Click close to the city on the map. Zoom in for precision!":"Click the matching shape on the world map. You have 10 seconds!");
+ $("pauseBtn").disabled=false;updateStats();startTimer();
+}
+function startTimer(){remaining=10;timerStart=performance.now();tick(timerStart)}
+function tick(now){
+ if(!active||paused||feedbackLock)return;
+ remaining=Math.max(0,10-(now-timerStart)/1000);
+ $("timer").textContent=remaining.toFixed(1);$("timer").classList.toggle("urgent",remaining<=3);$("timerRing").classList.toggle("urgent",remaining<=3);
+ $("ring").setAttribute("stroke-dashoffset",ringCirc*(1-remaining/10));
+ if(remaining<=0){timeoutRound();return}raf=requestAnimationFrame(tick);
+}
+function timeoutRound(){
+ if(!active||feedbackLock)return;answered++;streak=0;feedbackLock=true;cancelAnimationFrame(raf);
+ if(target.city)revealCity();else {const right=countries.find(c=>normalize(countryName(c))===normalize(target.name));if(right)f3(right,"reveal");}
+ showMessage("bad","Time's up!", (target.city?"The city was ":"The country was ")+target.name+". Ready for the next one?");updateStats();$("pauseBtn").disabled=true;
+ advanceTimeout=setTimeout(()=>{if(active&&!paused)nextRound()},1500);
+}
+function startGame(){
+ clearTimeout(advanceTimeout);cancelAnimationFrame(raf);mode=String(document.querySelector(".mode.selected").dataset.mode);
+ round=0;score=0;streak=0;best=0;correct=0;answered=0;active=true;paused=false;feedbackLock=false;
+ $("startOverlay").classList.add("hidden-overlay");$("resultOverlay").classList.add("hidden-overlay");
+ $("startBtn").textContent="Challenge in progress";$("startBtn").disabled=true;$("pauseBtn").disabled=false;$("pauseBtn").textContent="Ⅱ Pause game";
+ updateStats();nextRound();
+}
+function finish(){
+ active=false;paused=false;cancelAnimationFrame(raf);clearTimeout(advanceTimeout);$("pauseBtn").disabled=true;$("startBtn").disabled=false;$("startBtn").textContent="Start challenge →";
+ $("finalScore").textContent=score;$("finalCorrect").textContent=correct+"/"+round;$("finalBest").textContent=best+"×";$("finalAccuracy").textContent=(round?Math.round(correct/round*100):0)+"%";
+ $("resultTitle").textContent=correct>=Math.ceil(round*.8)?"World-class explorer!":correct>=Math.ceil(round*.5)?"Great exploring!":"Keep exploring!";
+ $("resultText").textContent=correct+" correct out of "+round+". "+(score>=1000?"You're building serious geography instincts.":"Every round is a chance to learn the world a little better.");
+ $("resultIcon").textContent=correct>=Math.ceil(round*.8)?"🏆":"🌍";$("resultOverlay").classList.remove("hidden-overlay");
+}
+$("playBtn").addEventListener("click",startGame);$("againBtn").addEventListener("click",()=>{$("resultOverlay").classList.add("hidden-overlay");$("startOverlay").classList.remove("hidden-overlay")});
+$("startBtn").addEventListener("click",()=>{$("startOverlay").classList.remove("hidden-overlay")});
+$("restartBtn").addEventListener("click",()=>{active=false;paused=false;cancelAnimationFrame(raf);clearTimeout(advanceTimeout);$("startBtn").disabled=false;$("startBtn").textContent="Start challenge →";$("pauseBtn").disabled=true;$("timer").textContent="10.0";$("target").textContent="Ready to explore?";svg.selectAll("path").classed("correct",false).classed("wrong",false).classed("reveal",false);showMessage("neutral","Ready when you are","Your target country will appear here. You have 10 seconds to find it.");$("startOverlay").classList.remove("hidden-overlay")});
+$("pauseBtn").addEventListener("click",()=>{
+ if(!active||feedbackLock)return;
+ if(!paused){paused=true;cancelAnimationFrame(raf);$("pauseBtn").textContent="▶ Resume game";showMessage("neutral","Game paused","Take a breath. Resume when you're ready.");}
+ else{paused=false;timerStart=performance.now()-(10-remaining)*1000;$("pauseBtn").textContent="Ⅱ Pause game";tick(performance.now());showMessage("neutral","Find the country","Clock is running again — choose quickly!");}
+});
+document.querySelectorAll(".mode").forEach(btn=>btn.addEventListener("click",()=>{document.querySelectorAll(".mode").forEach(b=>b.classList.remove("selected"));btn.classList.add("selected")}));
+$("startBtn").disabled=true;loadMap();
+$("zoomIn").addEventListener("click",()=>svg.transition().duration(220).call(zoomBehavior.scaleBy,1.5));
+$("zoomOut").addEventListener("click",()=>svg.transition().duration(220).call(zoomBehavior.scaleBy,1/1.5));
+$("zoomReset").addEventListener("click",()=>svg.transition().duration(250).call(zoomBehavior.transform,d3.zoomIdentity));
+})();
+</script>
+</body></html>
