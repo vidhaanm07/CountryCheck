@@ -22,6 +22,65 @@ button{font:inherit;cursor:pointer;border:0}button:focus-visible{outline:3px sol
 .overlay{position:fixed;inset:0;background:#030a12d9;backdrop-filter:blur(10px);z-index:10;display:grid;place-items:center;padding:20px}.modal{width:min(480px,100%);background:linear-gradient(150deg,#112b42,#0a1725);border:1px solid #2b4b63;border-radius:24px;padding:30px;text-align:center;box-shadow:0 30px 100px #0008}.modal-icon{font-size:42px;margin-bottom:12px}.modal h2{font-size:31px;letter-spacing:-1px;margin:0 0 10px}.modal p{color:var(--muted);line-height:1.6;font-size:14px;margin:0 0 21px}.mode-row{display:flex;gap:7px;margin:20px 0}.mode{min-width:0;padding:12px 5px}.mode strong{font-size:11px}.mode small{font-size:10px}.mode{flex:1;background:#0a1928;border:1px solid #2a455c;color:var(--text);border-radius:12px;padding:13px 8px}.mode.selected{border-color:var(--cyan);background:#123143}.mode strong{display:block;font-size:13px}.mode small{display:block;font-size:11px;color:var(--muted);margin-top:5px}.modal .btn-primary{width:100%;padding:14px}.hidden-overlay{display:none}.result-score{font-size:50px;font-weight:900;color:var(--cyan);letter-spacing:-2px;margin:8px 0}.result-meta{display:flex;justify-content:center;gap:23px;margin:18px 0 24px}.result-meta span{font-size:12px;color:var(--muted)}.result-meta b{display:block;color:var(--text);font-size:20px;margin-bottom:3px}
 @media(max-width:900px){.game-layout{grid-template-columns:1fr}.side-panel{display:grid;grid-template-columns:1fr 1fr;gap:15px}.side-panel .controls{grid-column:1/-1;grid-template-columns:1fr 1fr}.side-panel .hint{grid-column:1/-1}.map-stage,.map-stage svg{min-height:300px}}
 @media(max-width:560px){.app{padding:16px 11px 24px}.topbar{margin-bottom:18px}.pill{display:none}.hero{margin:13px 0 18px}.stats{gap:7px}.stat{padding:11px 10px;border-radius:12px}.stat .label{font-size:9px;letter-spacing:.7px}.stat .value{font-size:20px}.game-layout{gap:10px}.map-head{padding:14px}.map-stage,.map-stage svg{min-height:235px}.timer{font-size:24px}.timer-ring{width:36px;height:36px}.timer-ring svg{width:36px;height:36px}.side-panel{padding:14px;grid-template-columns:1fr 1fr}.map-footer{font-size:10px}.bottomline{flex-direction:column;align-items:flex-start;gap:5px}.target{font-size:23px}}
+
+/* Motion system: cinematic, subtle, and respectful of reduced-motion settings */
+:root{color-scheme:dark;--ease-out:cubic-bezier(.16,1,.3,1)}
+body:before,body:after{content:"";position:fixed;inset:-20%;pointer-events:none;z-index:-1;border-radius:50%;filter:blur(70px);opacity:.22;animation:auroraDrift 18s ease-in-out infinite alternate}
+body:before{background:radial-gradient(ellipse at 30% 35%,#1a7b9a 0%,transparent 48%);transform:translate3d(-5%,0,0)}
+body:after{background:radial-gradient(ellipse at 70% 60%,#364fc0 0%,transparent 45%);animation-delay:-9s}
+.app{animation:appEnter .7s var(--ease-out) both}
+.logo{animation:logoBreathe 4s ease-in-out infinite}
+.hero h2{animation:heroRise .65s var(--ease-out) both}
+.hero p{animation:heroRise .7s .08s var(--ease-out) both}
+.stat,.map-panel,.side-panel{transition:transform .25s var(--ease-out),border-color .25s,box-shadow .25s}
+.stat:hover{transform:translateY(-2px);border-color:#3c6684;box-shadow:0 10px 28px #0002}
+.stat .value{transition:color .2s}
+.stat.score-pop .value{animation:scorePop .45s var(--ease-out)}
+.map-panel{position:relative;isolation:isolate}
+.map-panel:after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;border:1px solid transparent;opacity:0;z-index:5}
+body.answer-correct .map-panel:after{animation:correctPulse .75s ease-out}
+body.answer-wrong .map-panel:after{animation:wrongPulse .42s ease-out}
+.map-stage:after{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;background:linear-gradient(180deg,transparent 0%,#52e5df09 50%,transparent 100%);background-size:100% 9px;opacity:.42}
+.country-shape{transform-box:fill-box;transform-origin:center;animation:landIn .5s var(--ease-out) both}
+.country-shape.correct{animation:correctLand .55s var(--ease-out) both}
+.country-shape.wrong{animation:wrongLand .38s ease-out both}
+.country-shape.reveal{animation:revealLand .7s ease-out both}
+#target .country{display:inline-block;animation:targetIn .38s var(--ease-out) both;text-shadow:0 0 22px #52e5df25}
+.timer{transition:color .2s}
+.timer-ring{filter:drop-shadow(0 0 8px #52e5df1b)}
+.message{transition:border-color .2s,background .2s,transform .2s}
+.message.good{animation:messageIn .3s var(--ease-out) both}
+.message.bad{animation:messageIn .3s var(--ease-out) both}
+.btn-primary{position:relative;overflow:hidden}
+.btn-primary:after{content:"";position:absolute;inset:-40% auto -40% -60%;width:35%;transform:skewX(-20deg);background:linear-gradient(90deg,transparent,#ffffff65,transparent);transition:left .55s var(--ease-out)}
+.btn-primary:hover:after{left:130%}
+.map-tools button{transition:transform .18s,border-color .18s,background .18s}
+.map-tools button:hover{transform:translateY(-2px);border-color:var(--cyan);background:#173b52}
+.overlay:not(.hidden-overlay){animation:overlayIn .25s ease-out both}
+.modal{animation:modalIn .45s var(--ease-out) both}
+.modal-icon{display:inline-block;animation:iconFloat 3.2s ease-in-out infinite}
+.result-score{animation:scorePop .55s var(--ease-out) both;text-shadow:0 0 30px #52e5df25}
+.progress-fill{background-size:200% 100%;animation:progressShimmer 3s linear infinite}
+@keyframes appEnter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes auroraDrift{from{transform:translate3d(-2%,-1%,0) scale(1)}to{transform:translate3d(3%,2%,0) scale(1.08)}}
+@keyframes logoBreathe{0%,100%{box-shadow:0 0 20px #52e5df22}50%{box-shadow:0 0 34px #52e5df55}}
+@keyframes heroRise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes landIn{from{opacity:.15}to{opacity:1}}
+@keyframes targetIn{from{opacity:0;transform:translateY(8px) scale(.98);filter:blur(3px)}to{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
+@keyframes scorePop{0%{transform:scale(1)}40%{transform:scale(1.12);color:var(--cyan)}100%{transform:scale(1)}}
+@keyframes correctLand{0%{filter:brightness(1)}45%{filter:brightness(1.8) drop-shadow(0 0 12px #4de0a3)}100%{filter:drop-shadow(0 0 6px #4de0a399)}}
+@keyframes wrongLand{0%,100%{transform:translateX(0)}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+@keyframes revealLand{0%{filter:brightness(1)}50%{filter:brightness(1.8) drop-shadow(0 0 12px #ffd166)}100%{filter:drop-shadow(0 0 6px #ffd16688)}}
+@keyframes correctPulse{0%{opacity:0;border-color:var(--green);box-shadow:inset 0 0 0 0 #4de0a300}35%{opacity:1;box-shadow:inset 0 0 70px #4de0a31b}100%{opacity:0;border-color:var(--green)}}
+@keyframes wrongPulse{0%,100%{opacity:0}35%{opacity:1;border-color:var(--red);box-shadow:inset 0 0 55px #ff6e7a12}}
+@keyframes messageIn{from{opacity:.65;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@keyframes overlayIn{from{opacity:0}to{opacity:1}}
+@keyframes modalIn{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes iconFloat{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-4px) rotate(2deg)}}
+@keyframes progressShimmer{from{background-position:100% 0}to{background-position:-100% 0}}
+@media(max-width:560px){.app{animation:none}.map-stage:after{opacity:.2}.country-shape{animation-duration:.25s}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}body:before,body:after{display:none}}
+
 </style>
 </head>
 <body>
@@ -104,6 +163,7 @@ function choose(f){
  if(!active||paused||feedbackLock||!target)return;
  const n=countryName(f), hit=normalize(n)===normalize(target.name);
  answered++;
+ document.body.classList.toggle("answer-correct",hit);document.body.classList.toggle("answer-wrong",!hit);
  if(hit){correct++;const bonus=Math.max(0,Math.round(50*remaining/10));score+=100+bonus;streak++;best=Math.max(best,streak);f3(f,"correct");showMessage("good","Correct! +"+(100+bonus)+" points",n+" found with "+remaining.toFixed(1)+" seconds left. "+(bonus?"Quick-pick bonus: +"+bonus+".":"")); }
  else{streak=0;f3(f,"wrong");const right=countries.find(c=>normalize(countryName(c))===normalize(target.name));if(right)f3(right,"reveal");showMessage("bad","Not quite!", "That was "+n+". The correct answer is "+target.name+". Keep going — next one is coming up.");}
  updateStats(); feedbackLock=true; cancelAnimationFrame(raf); $("pauseBtn").disabled=true;
@@ -115,11 +175,12 @@ svg.on("click.city",function(event){
  if(mode!=="city"||!active||paused||feedbackLock||!target||!target.city)return;
  const pt=d3.pointer(event,svg.node()), tr=d3.zoomTransform(svg.node()), dest=tr.apply(projection([target.lon,target.lat]));
  if(Math.hypot(pt[0]-dest[0],pt[1]-dest[1])<=18){
-  answered++;correct++;const bonus=Math.max(0,Math.round(50*remaining/10));score+=100+bonus;streak++;best=Math.max(best,streak);feedbackLock=true;cancelAnimationFrame(raf);revealCity();showMessage("good","City found! +"+(100+bonus)+" points",target.name+" located. Speed bonus: +"+bonus+".");updateStats();$("pauseBtn").disabled=true;advanceTimeout=setTimeout(()=>{if(active&&!paused)nextRound()},1500);
+  answered++;document.body.classList.add("answer-correct");document.body.classList.remove("answer-wrong");correct++;const bonus=Math.max(0,Math.round(50*remaining/10));score+=100+bonus;streak++;best=Math.max(best,streak);feedbackLock=true;cancelAnimationFrame(raf);revealCity();showMessage("good","City found! +"+(100+bonus)+" points",target.name+" located. Speed bonus: +"+bonus+".");updateStats();$("pauseBtn").disabled=true;advanceTimeout=setTimeout(()=>{if(active&&!paused)nextRound()},1500);
  } else {showMessage("neutral","Not quite there","Zoom in and try again — you have "+remaining.toFixed(1)+" seconds left.");}
 });
 function showMessage(cls,title,body){$("message").className="message "+cls;$("messageTitle").textContent=title;$("messageBody").textContent=body}
 function updateStats(){
+ const scoreCard=$("score").closest(".stat");scoreCard.classList.remove("score-pop");void scoreCard.offsetWidth;scoreCard.classList.add("score-pop");
  $("score").innerHTML=score+' <small>pts</small>';$("streak").innerHTML=streak+' <small>×</small>';$("best").innerHTML=best+' <small>×</small>';
  $("round").innerHTML=(mode==="endless"?round:Math.min(round,10))+' <small>/ '+(mode==="endless"?"∞":"10")+'</small>';
  const pct=mode==="endless"?Math.min(100,round%10*10):(round/10*100);$("progressFill").style.width=pct+"%";$("progressText").textContent=Math.round(pct)+"%";
@@ -155,14 +216,14 @@ function tick(now){
  if(remaining<=0){timeoutRound();return}raf=requestAnimationFrame(tick);
 }
 function timeoutRound(){
- if(!active||feedbackLock)return;answered++;streak=0;feedbackLock=true;cancelAnimationFrame(raf);
+ if(!active||feedbackLock)return;document.body.classList.remove("answer-correct");document.body.classList.add("answer-wrong");answered++;streak=0;feedbackLock=true;cancelAnimationFrame(raf);
  if(target.city)revealCity();else {const right=countries.find(c=>normalize(countryName(c))===normalize(target.name));if(right)f3(right,"reveal");}
  showMessage("bad","Time's up!", (target.city?"The city was ":"The country was ")+target.name+". Ready for the next one?");updateStats();$("pauseBtn").disabled=true;
  advanceTimeout=setTimeout(()=>{if(active&&!paused)nextRound()},1500);
 }
 function startGame(){
  clearTimeout(advanceTimeout);cancelAnimationFrame(raf);mode=String(document.querySelector(".mode.selected").dataset.mode);
- round=0;score=0;streak=0;best=0;correct=0;answered=0;active=true;paused=false;feedbackLock=false;
+ round=0;score=0;streak=0;best=0;correct=0;answered=0;document.body.classList.remove("answer-correct","answer-wrong");active=true;paused=false;feedbackLock=false;
  $("startOverlay").classList.add("hidden-overlay");$("resultOverlay").classList.add("hidden-overlay");
  $("startBtn").textContent="Challenge in progress";$("startBtn").disabled=true;$("pauseBtn").disabled=false;$("pauseBtn").textContent="Ⅱ Pause game";
  updateStats();nextRound();
