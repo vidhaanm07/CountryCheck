@@ -12,6 +12,10 @@ A fast-paced, interactive geography game. Find a country or locate a city on the
 - **Streak tracking:** current and best streak, round progress, score, accuracy, and end-of-run summary.
 - **Map controls:** zoom in, zoom out, reset zoom, and drag/pan around the map.
 - **Responsive UI:** designed for desktop and mobile screens.
+- **Cinematic motion:** animated aurora background, stagger-free map entrance, target transitions, modal motion, button shimmer, and subtle card hover effects.
+- **Instant feedback:** animated correct/wrong answer states, glowing answer reveal, and score pop animation.
+- **Accessibility-minded motion:** respects the device's `prefers-reduced-motion` setting.
+- **Lightweight frontend:** no framework, no backend, and no animation dependency; effects use CSS keyframes and the existing D3 map layer.
 - **No backend or account required:** game logic runs in the browser.
 
 ## Play locally
