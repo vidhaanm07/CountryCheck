@@ -41,7 +41,7 @@ body:after{background:radial-gradient(ellipse at 70% 60%,#364fc0 0%,transparent 
 body.answer-correct .map-panel:after{animation:correctPulse .75s ease-out}
 body.answer-wrong .map-panel:after{animation:wrongPulse .42s ease-out}
 .map-stage:after{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;background:linear-gradient(180deg,transparent 0%,#52e5df09 50%,transparent 100%);background-size:100% 9px;opacity:.42}
-.country-shape{transform-box:fill-box;transform-origin:center;animation:landIn .5s var(--ease-out) both}
+.country-shape{transform-box:fill-box;transform-origin:center}
 .country-shape.correct{animation:correctLand .55s var(--ease-out) both}
 .country-shape.wrong{animation:wrongLand .38s ease-out both}
 .country-shape.reveal{animation:revealLand .7s ease-out both}
@@ -78,7 +78,7 @@ body.answer-wrong .map-panel:after{animation:wrongPulse .42s ease-out}
 @keyframes modalIn{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes iconFloat{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-4px) rotate(2deg)}}
 @keyframes progressShimmer{from{background-position:100% 0}to{background-position:-100% 0}}
-@media(max-width:560px){.app{animation:none}.map-stage:after{opacity:.2}.country-shape{animation-duration:.25s}}
+@media(max-width:560px){.app{animation:none}.map-stage:after{opacity:.2}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}body:before,body:after{display:none}}
 
 </style>
@@ -123,7 +123,7 @@ body.answer-wrong .map-panel:after{animation:wrongPulse .42s ease-out}
 const $ = id => document.getElementById(id);
 const svg = d3.select("#worldMap");
 const ringCirc = 2 * Math.PI * 18;
-let countries=[], countryPaths, projection, path, mapLayer, zoomBehavior, target=null, mode="10", round=0, score=0, streak=0, best=0, correct=0, answered=0, active=false, paused=false, feedbackLock=false, timerStart=0, remaining=10, raf=0, advanceTimeout=0;
+let countries=[], countryPaths, countryByKey=new Map(), projection, path, mapLayer, zoomBehavior, target=null, mode="10", round=0, score=0, streak=0, best=0, correct=0, answered=0, active=false, paused=false, feedbackLock=false, timerStart=0, remaining=10, raf=0, advanceTimeout=0, lastTimerTenths=-1, countryBag=[];
 const nameFix = {"United States of America":"United States","Russian Federation":"Russia","Dem. Rep. Korea":"North Korea","Democratic People's Republic of Korea":"North Korea","Korea":"South Korea","Republic of Korea":"South Korea","Czechia":"Czech Republic","Côte d'Ivoire":"Ivory Coast","eSwatini":"Eswatini","Swaziland":"Eswatini","The Gambia":"Gambia","Lao PDR":"Laos","Syrian Arab Republic":"Syria","Iran (Islamic Republic of)":"Iran","Viet Nam":"Vietnam","Brunei Darussalam":"Brunei","United Republic of Tanzania":"Tanzania","Moldova":"Moldova","Bolivia (Plurinational State of)":"Bolivia","Venezuela (Bolivarian Republic of)":"Venezuela","Taiwan":"Taiwan","Congo":"Republic of the Congo","Republic of the Congo":"Republic of the Congo","Democratic Republic of the Congo":"Democratic Republic of the Congo","Ivory Coast":"Ivory Coast","Türkiye":"Turkey","Timor-Leste":"East Timor","North Macedonia":"North Macedonia"};
 const ignored = new Set(["Antarctica"]);
 const cities = [
@@ -142,6 +142,8 @@ async function loadMap(){
     const r=await fetch("https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson");if(!r.ok)throw e;geo=await r.json();
   }
   countries=geo.features.filter(f=>!ignored.has(countryName(f)) && countryName(f)!=="Unknown");
+  countryByKey=new Map(countries.map(f=>[normalize(countryName(f)),f]));
+  countryBag=[];
   drawMap(); $("mapLoading").classList.add("hidden");$("mapStatus").textContent="World map ready";$("startBtn").disabled=false;
  }catch(e){$("mapLoading").textContent="Couldn't load the map. Check your internet connection and refresh."; $("mapStatus").textContent="Map failed to load";$("startBtn").disabled=true;}
 }
@@ -157,7 +159,7 @@ function drawMap(){
   .interpolate(d3.interpolateZoom)
   .on("zoom",event=>mapLayer.attr("transform",event.transform));
  svg.call(zoomBehavior).on("dblclick.zoom",null);
- mapLayer.selectAll("path").data(countries).join("path").attr("class","country-shape").attr("d",path)
+ countryPaths=mapLayer.selectAll("path").data(countries, f=>String(f.id||countryName(f))).join("path").attr("class","country-shape").attr("d",path)
   .attr("data-key",f=>normalize(countryName(f))).attr("tabindex",0).attr("role","button")
   .attr("aria-label",f=>countryName(f))
   .on("click",(event,f)=>{if(mode!=="city")choose(f)})
@@ -169,11 +171,11 @@ function choose(f){
  answered++;
  document.body.classList.toggle("answer-correct",hit);document.body.classList.toggle("answer-wrong",!hit);
  if(hit){correct++;const bonus=Math.max(0,Math.round(50*remaining/10));score+=100+bonus;streak++;best=Math.max(best,streak);f3(f,"correct");showMessage("good","Correct! +"+(100+bonus)+" points",n+" found with "+remaining.toFixed(1)+" seconds left. "+(bonus?"Quick-pick bonus: +"+bonus+".":"")); }
- else{streak=0;f3(f,"wrong");const right=countries.find(c=>normalize(countryName(c))===normalize(target.name));if(right)f3(right,"reveal");showMessage("bad","Not quite!", "That was "+n+". The correct answer is "+target.name+". Keep going — next one is coming up.");}
+ else{streak=0;f3(f,"wrong");const right=countryByKey.get(normalize(target.name));if(right)f3(right,"reveal");showMessage("bad","Not quite!", "That was "+n+". The correct answer is "+target.name+". Keep going — next one is coming up.");}
  updateStats(); feedbackLock=true; cancelAnimationFrame(raf); $("pauseBtn").disabled=true;
  advanceTimeout=setTimeout(()=>{if(active&&!paused)nextRound()},1500);
 }
-function f3(f,cls){mapLayer.selectAll("path").filter(d=>d===f).classed(cls,true)}
+function f3(f,cls){if(!f)return;countryPaths.filter(d=>d===f).classed(cls,true)}
 function revealCity(){if(target&&target.city){const pt=projection([target.lon,target.lat]);mapLayer.append("circle").attr("cx",pt[0]).attr("cy",pt[1]).attr("r",5).attr("fill","#ffd166").attr("stroke","#fff").attr("stroke-width",2).style("filter","drop-shadow(0 0 7px #ffd166aa)").style("pointer-events","none");}}
 svg.on("click.city",function(event){
  if(mode!=="city"||!active||paused||feedbackLock||!target||!target.city)return;
@@ -195,28 +197,26 @@ function pickTarget(){
   for(let i=0;i<8&&next.name===target?.name;i++)next=cities[Math.floor(Math.random()*cities.length)];
   return {...next};
  }
- const pool=countries.filter(f=>!ignored.has(countryName(f)) && countryName(f)!=="Unknown");
- if(!pool.length)return null;
- let next=pool[Math.floor(Math.random()*pool.length)];
- for(let i=0;i<8&&normalize(countryName(next))===normalize(target?.name);i++)next=pool[Math.floor(Math.random()*pool.length)];
- return {name:countryName(next),feature:next};
+ if(!countryBag.length){countryBag=countries.slice();for(let i=countryBag.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[countryBag[i],countryBag[j]]=[countryBag[j],countryBag[i]];}if(countryBag.length>1&&normalize(countryName(countryBag[countryBag.length-1]))===normalize(target?.name)){[countryBag[0],countryBag[countryBag.length-1]]=[countryBag[countryBag.length-1],countryBag[0]];}}
+ const next=countryBag.pop();
+ return next?{name:countryName(next),feature:next}:null;
 }
 function nextRound(){
  if(!active)return;
  if(mode!=="endless"&&round>=(mode==="city"?10:Number(mode))){finish();return}
  round++;target=pickTarget();feedbackLock=false;
  mapLayer.selectAll("circle").remove();
- svg.selectAll("path").classed("correct",false).classed("wrong",false).classed("reveal",false);
- $("target").innerHTML='<span class="country">'+target.name+'</span>';
+ countryPaths.classed("correct",false).classed("wrong",false).classed("reveal",false);
+ $("target").replaceChildren(Object.assign(document.createElement("span"),{className:"country",textContent:target.name}));
  showMessage("neutral",mode==="city"?"Locate this city":"Find the country",mode==="city"?"Click close to the city on the map. Zoom in for precision!":"Click the matching shape on the world map. You have 10 seconds!");
  $("pauseBtn").disabled=false;updateStats();startTimer();
 }
-function startTimer(){remaining=10;timerStart=performance.now();tick(timerStart)}
+function startTimer(){remaining=10;lastTimerTenths=-1;timerStart=performance.now();tick(timerStart)}
 function tick(now){
  if(!active||paused||feedbackLock)return;
  remaining=Math.max(0,10-(now-timerStart)/1000);
- $("timer").textContent=remaining.toFixed(1);$("timer").classList.toggle("urgent",remaining<=3);$("timerRing").classList.toggle("urgent",remaining<=3);
- $("ring").setAttribute("stroke-dashoffset",ringCirc*(1-remaining/10));
+ const tenths=Math.ceil(remaining*10);
+ if(tenths!==lastTimerTenths){lastTimerTenths=tenths;$("timer").textContent=(tenths/10).toFixed(1);$("timer").classList.toggle("urgent",remaining<=3);$("timerRing").classList.toggle("urgent",remaining<=3);$("ring").setAttribute("stroke-dashoffset",ringCirc*(1-remaining/10));}
  if(remaining<=0){timeoutRound();return}raf=requestAnimationFrame(tick);
 }
 function timeoutRound(){
@@ -227,7 +227,7 @@ function timeoutRound(){
 }
 function startGame(){
  clearTimeout(advanceTimeout);cancelAnimationFrame(raf);mode=String(document.querySelector(".mode.selected").dataset.mode);
- round=0;score=0;streak=0;best=0;correct=0;answered=0;document.body.classList.remove("answer-correct","answer-wrong");active=true;paused=false;feedbackLock=false;
+ round=0;score=0;streak=0;best=0;correct=0;answered=0;countryBag=[];document.body.classList.remove("answer-correct","answer-wrong");active=true;paused=false;feedbackLock=false;
  $("startOverlay").classList.add("hidden-overlay");$("resultOverlay").classList.add("hidden-overlay");
  $("startBtn").textContent="Challenge in progress";$("startBtn").disabled=true;$("pauseBtn").disabled=false;$("pauseBtn").textContent="Ⅱ Pause game";
  updateStats();nextRound();
